@@ -1,5 +1,9 @@
 const Recipe = require("../models/recipe");
 const { pubsub } = require("./context.js");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user.js");
+
 module.exports = {
   Query: {
     async recipe(_, { ID }) {
@@ -11,6 +15,35 @@ module.exports = {
     },
   },
   Mutation: {
+    async register(
+      _,
+      { newUserInput: { username, password, email, address } }
+    ) {
+      const register = new User({
+        username: username,
+        password: await bcrypt.hash(password, 8),
+        email: email,
+        address: address,
+      });
+      console.log(register);
+      const res = await register.save();
+      return { id: res.id, ...res._doc };
+    },
+    async login(_, { username, password }) {
+      const user = await User.findOne({ username });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        throw new Error("Invalid password");
+      }
+      const token = jwt.sign(
+        { userId: user.id },
+        "your_secret_key" /*{ expiresIn: '1h' }*/
+      );
+      return token;
+    },
     async createRecipe(_, { recipeInput: { name, description } }) {
       const createdRecipe = new Recipe({
         name: name,

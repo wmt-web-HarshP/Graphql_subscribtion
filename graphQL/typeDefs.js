@@ -1,6 +1,12 @@
 const { gql } = require("apollo-server");
 
 module.exports = gql`
+  type User {
+    username: String!
+    password: String!
+    email: String!
+    address: String
+  }
   type Recipe {
     name: String
     description: String
@@ -8,6 +14,14 @@ module.exports = gql`
     thumbsUp: Int
     thumbsDown: Int
   }
+
+  input NewUserInput {
+    username: String!
+    password: String!
+    email: String!
+    address: String
+  }
+
   input RecipeInput {
     name: String
     description: String
@@ -23,11 +37,14 @@ module.exports = gql`
   }
 
   type Mutation {
+    register(newUserInput: NewUserInput): User!
+    login(username: String!, password: String!): String
     createRecipe(recipeInput: RecipeInput): Recipe!
     deleteRecipe(ID: ID!): Boolean
     editRecipe(ID: ID!, editrecipeInput: EditRecipeInput): Boolean
   }
   type Subscription {
+    newUser: User!
     newRecipe: Recipe!
   }
 `;

@@ -8,5 +8,4 @@ const recipeSchema = new Schema({
   thumbsDown: Number,
 });
 
-
 module.exports = model("Recipe", recipeSchema);
